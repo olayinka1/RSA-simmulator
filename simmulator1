@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Key Generator - Alice & Bob</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .person-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+        }
+        
+        .alice {
+            border-left-color: #e91e63;
+        }
+        
+        .bob {
+            border-left-color: #2196f3;
+        }
+        
+        .person-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .person-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .alice .person-avatar {
+            background: linear-gradient(45deg, #e91e63, #f06292);
+        }
+        
+        .bob .person-avatar {
+            background: linear-gradient(45deg, #2196f3, #64b5f6);
+        }
+        
+        .person-name {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #2196f3, #21cbf3);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn-encrypt {
+            background: linear-gradient(45deg, #4caf50, #66bb6a);
+            color: white;
+        }
+        
+        .btn-encrypt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn-decrypt {
+            background: linear-gradient(45deg, #ff9800, #ffc107);
+            color: white;
+        }
+        
+        .btn-decrypt:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .steps h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .step {
+            margin-bottom: 12px;
+            padding: 8px 0;
+            font-family: 'Courier New', monospace;
+            color: #555;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background: #2196f3;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        
+        .keys-display {
+            background: #1e1e1e;
+            color: #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        
+        .key-label {
+            color: #ffff00;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .key-value {
+            color: #00ffff;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+        
+        .message-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .message-input-group {
+            margin-bottom: 20px;
+        }
+        
+        .message-input-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        
+        .message-input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .message-input-group input:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+        
+        .encryption-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .result-display {
+            background: #f0f8ff;
+            border: 2px solid #2196f3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.6;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+        
+        .disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        
+        @media (max-width: 768px) {
+            .encryption-controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 RSA Key Generator</h1>
+            <p>Simplified Educational Tool - Alice & Bob</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="warning">
+                <strong>Educational Purpose:</strong> This tool uses small primes for demonstration. Keys are auto-generated for simplicity. In real-world applications, RSA uses much larger primes (2048+ bits) for security.
+            </div>
+            
+            <!-- Alice Section -->
+            <div class="person-section alice">
+                <div class="person-header">
+                    <div class="person-avatar">A</div>
+                    <div class="person-name">Alice's Keys</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateKeys('alice')">Generate Alice's Keys</button>
+                
+                <div class="steps" id="alice-steps" style="display: none;">
+                    <h3>Key Generation Steps:</h3>
+                    <div id="alice-steps-content"></div>
+                </div>
+                
+                <div class="keys-display" id="alice-keys" style="display: none;"></div>
+            </div>
+            
+            <!-- Bob Section -->
+            <div class="person-section bob">
+                <div class="person-header">
+                    <div class="person-avatar">B</div>
+                    <div class="person-name">Bob's Keys</div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateKeys('bob')">Generate Bob's Keys</button>
+                
+                <div class="steps" id="bob-steps" style="display: none;">
+                    <h3>Key Generation Steps:</h3>
+                    <div id="bob-steps-content"></div>
+                </div>
+                
+                <div class="keys-display" id="bob-keys" style="display: none;"></div>
+            </div>
+            
+            <!-- Message Communication Section -->
+            <div class="message-section">
+                <div class="person-header">
+                    <div class="person-avatar" style="background: linear-gradient(45deg, #4caf50, #8bc34a);">📨</div>
+                    <div class="person-name">Secure Communication</div>
+                </div>
+                
+                <div class="message-input-group">
+                    <label>Message (text will be converted to numbers):</label>
+                    <input type="text" id="message-input" placeholder="Enter your message here..." value="Hello Bob!">
+                </div>
+                
+                <div class="encryption-controls">
+                    <button class="btn btn-encrypt" onclick="aliceEncryptToBob()" id="alice-encrypt-btn" disabled>
+                        Alice → Bob (Encrypt)
+                    </button>
+                    <button class="btn btn-decrypt" onclick="bobDecrypt()" id="bob-decrypt-btn" disabled>
+                        Bob Decrypt
+                    </button>
+                    <button class="btn btn-encrypt" onclick="bobEncryptToAlice()" id="bob-encrypt-btn" disabled>
+                        Bob → Alice (Encrypt)
+                    </button>
+                    <button class="btn btn-decrypt" onclick="aliceDecrypt()" id="alice-decrypt-btn" disabled>
+                        Alice Decrypt
+                    </button>
+                </div>
+                
+                <div class="result-display" id="communication-result" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store generated keys and messages
+        let aliceKeys = null;
+        let bobKeys = null;
+        let aliceToBobMessage = null;
+        let bobToAliceMessage = null;
+
+        // Prime checking function
+        function isPrime(n) {
+            if (n < 2) return false;
+            if (n === 2) return true;
+            if (n % 2 === 0) return false;
+            
+            for (let i = 3; i <= Math.sqrt(n); i += 2) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        // Generate random prime in range
+        function getRandomPrime(min = 50, max = 150) {
+            let num;
+            do {
+                num = Math.floor(Math.random() * (max - min + 1)) + min;
+            } while (!isPrime(num));
+            return num;
+        }
+
+        // Extended Euclidean Algorithm
+        function extendedGCD(a, b) {
+            if (a === 0) return [b, 0, 1];
+            
+            let [gcd, x1, y1] = extendedGCD(b % a, a);
+            let x = y1 - Math.floor(b / a) * x1;
+            let y = x1;
+            
+            return [gcd, x, y];
+        }
+
+        // Modular inverse
+        function modInverse(e, phi) {
+            let [gcd, x, y] = extendedGCD(e, phi);
+            if (gcd !== 1) return null;
+            return ((x % phi) + phi) % phi;
+        }
+
+        // GCD function
+        function gcd(a, b) {
+            while (b !== 0) {
+                let temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        // Modular exponentiation
+        function modPow(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+
+        // Convert text to numbers (simple ASCII conversion)
+        function textToNumbers(text) {
+            return text.split('').map(char => char.charCodeAt(0));
+        }
+
+        // Convert numbers back to text
+        function numbersToText(numbers) {
+            return numbers.map(num => String.fromCharCode(num)).join('');
+        }
+
+        // Generate RSA keys automatically
+        function generateKeys(person) {
+            // Generate two random primes
+            const p = getRandomPrime(50, 100);
+            let q = getRandomPrime(50, 100);
+            while (q === p) {
+                q = getRandomPrime(50, 100);
+            }
+
+            // Calculate RSA parameters
+            const n = p * q;
+            const phi = (p - 1) * (q - 1);
+
+            // Choose a good e value
+            let e = 65537;
+            if (e >= phi || gcd(e, phi) !== 1) {
+                e = 17;
+                if (e >= phi || gcd(e, phi) !== 1) {
+                    e = 3;
+                    if (e >= phi || gcd(e, phi) !== 1) {
+                        e = 7;
+                    }
+                }
+            }
+
+            const d = modInverse(e, phi);
+            if (d === null) {
+                alert('Key generation failed. Trying again...');
+                generateKeys(person);
+                return;
+            }
+
+            // Store keys
+            const keys = { p, q, n, phi, e, d };
+            if (person === 'alice') {
+                aliceKeys = keys;
+            } else {
+                bobKeys = keys;
+            }
+
+            // Display steps and keys
+            displaySteps(person, p, q, n, phi, e, d);
+            displayKeys(person, keys);
+            
+            // Update button states
+            updateButtonStates();
+        }
+
+        // Display generation steps
+        function displaySteps(person, p, q, n, phi, e, d) {
+            const stepsContent = document.getElementById(`${person}-steps-content`);
+            stepsContent.innerHTML = `
+                <div class="step"><span class="step-number">1</span>Auto-generated primes: p = ${p}, q = ${q}</div>
+                <div class="step"><span class="step-number">2</span>Calculate n = p × q = ${p} × ${q} = ${n}</div>
+                <div class="step"><span class="step-number">3</span>Calculate φ(n) = (p-1)(q-1) = ${p-1} × ${q-1} = ${phi}</div>
+                <div class="step"><span class="step-number">4</span>Choose e = ${e} (coprime to φ(n))</div>
+                <div class="step"><span class="step-number">5</span>Calculate d ≡ e⁻¹ (mod φ(n)) = ${d}</div>
+                <div class="step"><span class="step-number">6</span>Public key: (n=${n}, e=${e})</div>
+                <div class="step"><span class="step-number">7</span>Private key: (n=${n}, d=${d})</div>
+            `;
+            document.getElementById(`${person}-steps`).style.display = 'block';
+        }
+
+        // Display keys
+        function displayKeys(person, keys) {
+            const keysDisplay = document.getElementById(`${person}-keys`);
+            keysDisplay.innerHTML = `
+                <div class="key-label">PUBLIC KEY (shareable):</div>
+                <div class="key-value">n = ${keys.n}</div>
+                <div class="key-value">e = ${keys.e}</div>
+                
+                <div class="key-label">PRIVATE KEY (keep secret!):</div>
+                <div class="key-value">n = ${keys.n}</div>
+                <div class="key-value">d = ${keys.d}</div>
+                
+                <div class="key-label">INTERNAL PARAMETERS:</div>
+                <div class="key-value">p = ${keys.p} (secret)</div>
+                <div class="key-value">q = ${keys.q} (secret)</div>
+                <div class="key-value">φ(n) = ${keys.phi} (secret)</div>
+            `;
+            keysDisplay.style.display = 'block';
+        }
+
+        // Update button states based on available keys
+        function updateButtonStates() {
+            const aliceEncryptBtn = document.getElementById('alice-encrypt-btn');
+            const bobDecryptBtn = document.getElementById('bob-decrypt-btn');
+            const bobEncryptBtn = document.getElementById('bob-encrypt-btn');
+            const aliceDecryptBtn = document.getElementById('alice-decrypt-btn');
+
+            // Alice can encrypt to Bob if Bob has keys
+            aliceEncryptBtn.disabled = !bobKeys;
+            aliceEncryptBtn.className = bobKeys ? 'btn btn-encrypt' : 'btn btn-encrypt disabled';
+
+            // Bob can decrypt if there's a message from Alice
+            bobDecryptBtn.disabled = !aliceToBobMessage;
+            bobDecryptBtn.className = aliceToBobMessage ? 'btn btn-decrypt' : 'btn btn-decrypt disabled';
+
+            // Bob can encrypt to Alice if Alice has keys
+            bobEncryptBtn.disabled = !aliceKeys;
+            bobEncryptBtn.className = aliceKeys ? 'btn btn-encrypt' : 'btn btn-encrypt disabled';
+
+            // Alice can decrypt if there's a message from Bob
+            aliceDecryptBtn.disabled = !bobToAliceMessage;
+            aliceDecryptBtn.className = bobToAliceMessage ? 'btn btn-decrypt' : 'btn btn-decrypt disabled';
+        }
+
+        // Alice encrypts message to Bob
+        function aliceEncryptToBob() {
+            if (!bobKeys) {
+                alert('Please generate Bob\'s keys first!');
+                return;
+            }
+
+            const messageText = document.getElementById('message-input').value;
+            if (!messageText.trim()) {
+                alert('Please enter a message!');
+                return;
+            }
+
+            const messageNumbers = textToNumbers(messageText);
+            const encryptedNumbers = [];
+
+            // Encrypt each character
+            for (let num of messageNumbers) {
+                if (num >= bobKeys.n) {
+                    alert(`Character '${String.fromCharCode(num)}' (${num}) is too large for this key size. Try shorter messages or regenerate keys.`);
+                    return;
+                }
+                encryptedNumbers.push(modPow(num, bobKeys.e, bobKeys.n));
+            }
+
+            aliceToBobMessage = {
+                original: messageText,
+                numbers: messageNumbers,
+                encrypted: encryptedNumbers
+            };
+
+            const resultDiv = document.getElementById('communication-result');
+            resultDiv.innerHTML = `
+                <strong>📤 Alice → Bob Encryption:</strong><br>
+                Original message: "${messageText}"<br>
+                ASCII values: [${messageNumbers.join(', ')}]<br>
+                Using Bob's public key (n=${bobKeys.n}, e=${bobKeys.e})<br>
+                Encrypted values: [${encryptedNumbers.join(', ')}]<br><br>
+                <em>Message encrypted! Bob can now decrypt it with his private key.</em>
+            `;
+            resultDiv.style.display = 'block';
+            
+            updateButtonStates();
+        }
+
+        // Bob decrypts message from Alice
+        function bobDecrypt() {
+            if (!aliceToBobMessage || !bobKeys) {
+                alert('No encrypted message from Alice to decrypt!');
+                return;
+            }
+
+            const decryptedNumbers = [];
+            for (let encNum of aliceToBobMessage.encrypted) {
+                decryptedNumbers.push(modPow(encNum, bobKeys.d, bobKeys.n));
+            }
+
+            const decryptedText = numbersToText(decryptedNumbers);
+
+            const resultDiv = document.getElementById('communication-result');
+            resultDiv.innerHTML += `<br>
+                <strong>🔓 Bob Decrypts:</strong><br>
+                Encrypted values: [${aliceToBobMessage.encrypted.join(', ')}]<br>
+                Using Bob's private key (n=${bobKeys.n}, d=${bobKeys.d})<br>
+                Decrypted ASCII: [${decryptedNumbers.join(', ')}]<br>
+                Decrypted message: "${decryptedText}"<br><br>
+                <em>✅ Success! Bob received: "${decryptedText}"</em>
+            `;
+        }
+
+        // Bob encrypts message to Alice
+        function bobEncryptToAlice() {
+            if (!aliceKeys) {
+                alert('Please generate Alice\'s keys first!');
+                return;
+            }
+
+            const messageText = document.getElementById('message-input').value;
+            if (!messageText.trim()) {
+                alert('Please enter a message!');
+                return;
+            }
+
+            const messageNumbers = textToNumbers(messageText);
+            const encryptedNumbers = [];
+
+            // Encrypt each character
+            for (let num of messageNumbers) {
+                if (num >= aliceKeys.n) {
+                    alert(`Character '${String.fromCharCode(num)}' (${num}) is too large for this key size. Try shorter messages or regenerate keys.`);
+                    return;
+                }
+                encryptedNumbers.push(modPow(num, aliceKeys.e, aliceKeys.n));
+            }
+
+            bobToAliceMessage = {
+                original: messageText,
+                numbers: messageNumbers,
+                encrypted: encryptedNumbers
+            };
+
+            const resultDiv = document.getElementById('communication-result');
+            resultDiv.innerHTML = `
+                <strong>📤 Bob → Alice Encryption:</strong><br>
+                Original message: "${messageText}"<br>
+                ASCII values: [${messageNumbers.join(', ')}]<br>
+                Using Alice's public key (n=${aliceKeys.n}, e=${aliceKeys.e})<br>
+                Encrypted values: [${encryptedNumbers.join(', ')}]<br><br>
+                <em>Message encrypted! Alice can now decrypt it with her private key.</em>
+            `;
+            resultDiv.style.display = 'block';
+            
+            updateButtonStates();
+        }
+
+        // Alice decrypts message from Bob
+        function aliceDecrypt() {
+            if (!bobToAliceMessage || !aliceKeys) {
+                alert('No encrypted message from Bob to decrypt!');
+                return;
+            }
+
+            const decryptedNumbers = [];
+            for (let encNum of bobToAliceMessage.encrypted) {
+                decryptedNumbers.push(modPow(encNum, aliceKeys.d, aliceKeys.n));
+            }
+
+            const decryptedText = numbersToText(decryptedNumbers);
+
+            const resultDiv = document.getElementById('communication-result');
+            resultDiv.innerHTML += `<br>
+                <strong>🔓 Alice Decrypts:</strong><br>
+                Encrypted values: [${bobToAliceMessage.encrypted.join(', ')}]<br>
+                Using Alice's private key (n=${aliceKeys.n}, d=${aliceKeys.d})<br>
+                Decrypted ASCII: [${decryptedNumbers.join(', ')}]<br>
+                Decrypted message: "${decryptedText}"<br><br>
+                <em>✅ Success! Alice received: "${decryptedText}"</em>
+            `;
+        }
+
+        // Initialize
+        window.onload = function() {
+            updateButtonStates();
+        };
+    </script>
+</body>
+</html>
